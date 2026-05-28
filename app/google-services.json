@@ -2,28 +2,21 @@
   "project_info": {
     "project_number": "1037007369851",
     "project_id": "periods-pwa",
-    "storage_bucket": "periods-pwa.firebasestorage.app"
+    "storage_bucket": "periods-pwa.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1037007369851:android:b63493c5f09345f530d4de",
+        "mobilesdk_app_id": "1:1037007369851:android:f109f4e0eb5def1830d4de",
         "android_client_info": {
           "package_name": "com.aistudio.periods.pwa"
         }
       },
-      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAzMBH7Np7MwTTtdZ2WINj5klr2iadLePE"
+          "current_key": "AIzaSyAZQSsBTBMR4dGBkyka5VhPGB0FZ3lVtjQ"
         }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
+      ]
     }
-  ],
-  "configuration_version": "1"
+  ]
 }
