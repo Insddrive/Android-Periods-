@@ -37,7 +37,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
         )
 
-        val channelId = "periods_vibration_channel"
+        val channelId = "periods_vibration_channel_v3"
         val pattern = longArrayOf(300, 100, 300, 100, 300) // Delay before start, vibrate, sleep...
         
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
@@ -45,6 +45,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)
+            .setVibrate(pattern) // Set vibration directly on builder as well
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // PRIORITY_HIGH for Android < 8.0
             .setContentIntent(pendingIntent)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
