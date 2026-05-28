@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Periods</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ec4899">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Noto Sans Gurmukhi', sans-serif; background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%); min-height: 100vh; }
+        .glass { background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(219,39,119,0.08), 0 1px 4px rgba(0,0,0,0.06); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #fdf2f8; }
+        ::-webkit-scrollbar-thumb { background: #f9a8d4; border-radius: 3px; }
+        .tab-btn { transition: all 0.2s; }
+        .tab-btn.active { background: linear-gradient(135deg, #ec4899, #a855f7); color: white; box-shadow: 0 2px 8px rgba(236,72,153,0.3); }
+        .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+        .badge-normal { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .badge-early { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .badge-late { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+        .badge-first { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+        .symptom-chip { cursor: pointer; user-select: none; transition: all 0.15s; border: 2px solid #e5e7eb; border-radius: 999px; padding: 4px 12px; font-size: 0.8rem; }
+        .symptom-chip.selected { border-color: #ec4899; background: #fdf2f8; color: #be185d; }
+        .mood-btn { cursor: pointer; user-select: none; font-size: 1.6rem; transition: transform 0.15s; border-radius: 12px; padding: 6px 10px; border: 2px solid transparent; }
+        .mood-btn.selected { border-color: #ec4899; background: #fdf2f8; transform: scale(1.15); }
+        .flow-btn { cursor: pointer; user-select: none; transition: all 0.15s; border: 2px solid #e5e7eb; border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; font-weight: 600; }
+        .flow-btn.selected { border-color: #ec4899; background: #fdf2f8; color: #be185d; }
+        .stat-card { background: white; border-radius: 14px; padding: 14px 16px; border: 1px solid #fce7f3; }
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-circle { transition: stroke-dashoffset 0.8s ease; }
+        #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: white; padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; z-index: 9999; transition: transform 0.3s ease; pointer-events: none; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased pb-12">
+
+<header class="bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg py-4 sticky top-0 z-50">
+    <div class="container mx-auto px-4 flex justify-between items-center max-w-5xl">
+        <h1 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-heart-pulse"></i> Periods</h1>
+        <div class="flex gap-2">
+            <button onclick="enableNotifications()" title="ਨੋਟੀਫਿਕੇਸ਼ਨ ਚਾਲੂ ਕਰੋ" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <i class="fa-solid fa-bell"></i> <span class="hidden sm:inline">Alerts</span>
+            </button>
+            <button onclick="exportJSON()" title="ਡਾਟਾ ਬੈਕਅੱਪ" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">ਬੈਕਅੱਪ</span>
+            </button>
+            <label title="ਡਾਟਾ ਰਿਸਟੋਰ" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer">
+                <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">ਰਿਸਟੋਰ</span>
+                <input type="file" accept=".json" id="importFile" class="hidden" onchange="importJSON(event)">
+            </label>
+        </div>
+    </div>
+</header>
+
+<main class="container mx-auto px-3 mt-5 max-w-5xl">
+
+    <div class="flex gap-2 mb-5 bg-white rounded-2xl p-1.5 shadow-sm border border-pink-100">
+        <button class="tab-btn active flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5" onclick="switchTab('dashboard')">
+            <i class="fa-solid fa-gauge-high"></i> ਡੈਸ਼ਬੋਰਡ
+        </button>
+        <button class="tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 flex items-center justify-center gap-1.5" onclick="switchTab('add')">
+            <i class="fa-solid fa-plus-circle"></i> ਦਰਜ ਕਰੋ
+        </button>
+        <button class="tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 flex items-center justify-center gap-1.5" onclick="switchTab('history')">
+            <i class="fa-solid fa-table-list"></i> ਰਿਕਾਰਡ
+        </button>
+        <button class="tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 flex items-center justify-center gap-1.5" onclick="switchTab('stats')">
+            <i class="fa-solid fa-chart-pie"></i> ਅੰਕੜੇ
+        </button>
+    </div>
+
+    <div id="tab-dashboard" class="space-y-4">
+        <div class="glass rounded-2xl p-5 border-t-4 border-pink-500">
+            <h2 class="text-lg font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-calendar-day"></i> ਮੌਜੂਦਾ ਸਥਿਤੀ</h2>
+            <div id="statusDashboard"><div class="text-center py-6 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div></div>
+        </div>
+        
+        <div class="glass rounded-2xl p-5 border-t-4 border-green-400">
+            <h2 class="text-lg font-bold text-green-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-lightbulb"></i> ਅੱਜ ਦਾ ਸਿਹਤ ਸੁਝਾਅ</h2>
+            <div id="healthTip" class="text-sm text-gray-600 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <div id="tab-add" class="hidden space-y-4">
+        <div class="glass rounded-2xl p-5 border-t-4 border-purple-500">
+            <h2 id="addFormTitle" class="text-lg font-bold text-purple-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-plus-circle"></i> ਨਵੀਂ ਤਰੀਕ ਦਰਜ ਕਰੋ</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">ਪੀਰੀਅਡ ਸ਼ੁਰੂ ਹੋਣ ਦੀ ਤਰੀਕ:</label>
+                    <input type="date" id="periodDate" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-400 focus:outline-none transition text-base">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">ਫਲੋਅ ਦੀ ਮਾਤਰਾ (Flow):</label>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="flow-btn" data-flow="ਹਲਕਾ" onclick="selectFlow(this)">💧 ਹਲਕਾ</button>
+                        <button class="flow-btn" data-flow="ਮੱਧਮ" onclick="selectFlow(this)">💧💧 ਮੱਧਮ</button>
+                        <button class="flow-btn" data-flow="ਭਾਰਾ" onclick="selectFlow(this)">💧💧💧 ਭਾਰਾ</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">ਦਰਦ ਦੀ ਤੀਬਰਤਾ (Pain): <span id="painLabel" class="text-purple-600">0 / 10</span></label>
+                    <input type="range" id="painLevel" min="0" max="10" value="0" class="w-full accent-pink-500" oninput="document.getElementById('painLabel').textContent=this.value+' / 10'">
+                    <div class="flex justify-between text-xs text-gray-400 mt-1"><span>ਕੋਈ ਨਹੀਂ</span><span>ਬਹੁਤ ਜ਼ਿਆਦਾ</span></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">ਮੂਡ (Mood):</label>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="mood-btn" data-mood="ਖੁਸ਼" onclick="selectMood(this)">😊</button>
+                        <button class="mood-btn" data-mood="ਆਮ" onclick="selectMood(this)">😐</button>
+                        <button class="mood-btn" data-mood="ਉਦਾਸ" onclick="selectMood(this)">😢</button>
+                        <button class="mood-btn" data-mood="ਚਿੜਚਿੜਾ" onclick="selectMood(this)">😠</button>
+                        <button class="mood-btn" data-mood="ਥਕਿਆ" onclick="selectMood(this)">😴</button>
+                        <button class="mood-btn" data-mood="ਚਿੰਤਤ" onclick="selectMood(this)">😰</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">ਲੱਛਣ (Symptoms):</label>
+                    <div class="flex flex-wrap gap-2" id="symptomChips">
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🤕 ਸਿਰ ਦਰਦ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🤰 ਪੇਟ ਦਰਦ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🦵 ਕਮਰ ਦਰਦ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🤢 ਮਤਲੀ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🫧 ਫੁੱਲਣਾ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">😓 ਬਹੁਤ ਥਕਾਵਟ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🍫 ਖਾਣ ਦੀ ਇੱਛਾ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">💤 ਨੀਂਦ ਦੀ ਸਮੱਸਿਆ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🌊 ਚੱਕਰ ਆਉਣਾ</span>
+                        <span class="symptom-chip" onclick="toggleSymptom(this)">🫀 ਛਾਤੀ ਵਿੱਚ ਦਰਦ</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">ਨੋਟ (Note):</label>
+                    <textarea id="periodNote" rows="2" placeholder="ਕੋਈ ਵਾਧੂ ਜਾਣਕਾਰੀ..." class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-400 focus:outline-none transition text-sm resize-none"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button id="saveBtn" onclick="handleAddPeriod()" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition flex justify-center items-center gap-2 text-base">
+                        <i class="fa-solid fa-save"></i> ਡਾਟਾ ਸੇਵ ਕਰੋ
+                    </button>
+                    <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-4 rounded-xl shadow-sm transition">
+                        ਰੱਦ ਕਰੋ
+                    </button>
+                </div>
+                <p class="text-xs text-center text-gray-400">* ਡਾਟਾ ਤੁਹਾਡੇ ਫੋਨ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਰਹੇਗਾ।</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-history" class="hidden space-y-4">
+        <div class="glass rounded-2xl p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <select id="yearFilter" onchange="renderHistory()" class="bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-400 transition shadow-sm">
+                    <option value="all">ਸਾਰੇ ਸਾਲ</option>
+                </select>
+                <select id="statusFilter" onchange="renderHistory()" class="bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-400 transition shadow-sm">
+                    <option value="all">ਸਾਰੀ ਸਥਿਤੀ</option>
+                    <option value="normal">ਨਾਰਮਲ</option>
+                    <option value="early">ਜਲਦੀ</option>
+                    <option value="late">ਲੇਟ</option>
+                </select>
+                <select id="flowFilter" onchange="renderHistory()" class="bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-400 transition shadow-sm">
+                    <option value="all">ਸਾਰਾ ਫਲੋਅ</option>
+                    <option value="ਹਲਕਾ">ਹਲਕਾ</option>
+                    <option value="ਮੱਧਮ">ਮੱਧਮ</option>
+                    <option value="ਭਾਰਾ">ਭਾਰਾ</option>
+                </select>
+            </div>
+            <div class="mb-5">
+                <input type="text" id="searchFilter" placeholder="🔍 ਨੋਟ ਜਾਂ ਲੱਛਣ ਖੋਜੋ..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 transition shadow-sm" oninput="renderHistory()">
+            </div>
+            <button onclick="downloadPDF()" class="w-full mb-5 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-white px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2 justify-center shadow-md transition">
+                <i class="fa-solid fa-file-pdf text-red-400 text-lg"></i> PDF ਡਾਊਨਲੋਡ ਕਰੋ
+            </button>
+            <div id="historyContainer"></div>
+            <div id="emptyState" class="hidden text-center py-10 text-gray-400">
+                <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i><br>ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਮਿਲਿਆ।
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-stats" class="hidden space-y-4">
+        <div id="statsContent"></div>
+    </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => console.log('SW Registered'))
+        .catch(err => console.log('SW Registration failed: ', err));
+    });
+  }
+</script>
+
+<script>
+let cycles = JSON.parse(localStorage.getItem('periodTrackerData_v3')) || [];
+let selectedMood = '';
+let selectedFlow = '';
+let selectedSymptoms = [];
+let editingId = null;
+
+const phaseData = [
+    { min:1, max:5, name:"ਮਾਹਵਾਰੀ", arousal:"ਘੱਟ", color:"bg-red-50 text-red-800 border border-red-200", icon:"fa-droplet", tip:"ਹਲਕੀ ਕਸਰਤ ਕਰੋ, ਆਇਰਨ ਵਾਲਾ ਖਾਣਾ ਖਾਓ, ਆਰਾਮ ਕਰੋ।" },
+    { min:6, max:11, name:"ਫੋਲੀਕੂਲਰ", arousal:"ਵੱਧਦੀ", color:"bg-blue-50 text-blue-800 border border-blue-200", icon:"fa-arrow-trend-up", tip:"ਇਹ ਊਰਜਾ ਦਾ ਸਮਾਂ ਹੈ। ਨਵੇਂ ਕੰਮ ਸ਼ੁਰੂ ਕਰਨ ਦਾ ਵਧੀਆ ਵਕਤ।" },
+    { min:12, max:15, name:"ਓਵੂਲੇਸ਼ਨ", arousal:"ਸਭ ਤੋਂ ਵੱਧ", color:"bg-pink-50 text-pink-800 border border-pink-200", icon:"fa-fire-flame-curved", tip:"ਤੁਸੀਂ ਸਭ ਤੋਂ ਵੱਧ ਊਰਜਾਵਾਨ ਹੋ। ਸਮਾਜਿਕ ਮੇਲਜੋਲ ਲਈ ਵਧੀਆ ਸਮਾਂ।" },
+    { min:16, max:23, name:"ਲੂਟੀਅਲ", arousal:"ਘੱਟਦੀ", color:"bg-purple-50 text-purple-800 border border-purple-200", icon:"fa-arrow-trend-down", tip:"ਸ਼ਾਂਤ ਰਹੋ। ਮੈਗਨੀਸ਼ੀਅਮ ਅਤੇ ਵਿਟਾਮਿਨ B6 ਖਾਓ।" },
+    { min:24, max:35, name:"PMS", arousal:"ਬਹੁਤ ਘੱਟ", color:"bg-orange-50 text-orange-800 border border-orange-200", icon:"fa-battery-quarter", tip:"ਨਮਕ ਅਤੇ ਕੈਫ਼ੀਨ ਘੱਟ ਕਰੋ। ਗਰਮ ਪਾਣੀ ਦੀ ਬੋਤਲ ਦਰਦ ਘੱਟ ਕਰੇਗੀ।" }
+];
+
+function getLocalDate() {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+}
+
+function daysDiff(d1, d2) {
+    const a = new Date(d1), b = new Date(d2);
+    a.setHours(0,0,0,0); b.setHours(0,0,0,0);
+    return Math.round((b-a)/(1000*60*60*24));
+}
+function fmtDate(ds) {
+    return new Date(ds+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+function getPhase(day) {
+    return phaseData.find(p=>day>=p.min&&day<=p.max) || { name:"ਦੇਰੀ (Late)", arousal:"ਅਨਿਸ਼ਚਿਤ", color:"bg-orange-50 text-orange-800 border border-orange-200", icon:"fa-clock", tip:"ਪੀਰੀਅਡਸ ਦੇਰ ਨਾਲ ਆ ਰਹੇ ਹਨ। ਜੇ ਵੱਧ ਦੇਰ ਹੋ ਜਾਵੇ ਤਾਂ ਡਾਕਟਰ ਨਾਲ ਗੱਲ ਕਰੋ।" };
+}
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2800);
+}
+function setFormMode(isEditing) {
+    const btn = document.getElementById('saveBtn');
+    const cancel = document.getElementById('cancelEditBtn');
+    const title = document.getElementById('addFormTitle');
+    if (btn) btn.innerHTML = isEditing ? '<i class="fa-solid fa-pen-to-square"></i> ਰਿਕਾਰਡ ਅਪਡੇਟ ਕਰੋ' : '<i class="fa-solid fa-save"></i> ਡਾਟਾ ਸੇਵ ਕਰੋ';
+    if (cancel) cancel.classList.toggle('hidden', !isEditing);
+    if (title) title.innerHTML = isEditing ? '<i class="fa-solid fa-pen-to-square"></i> ਰਿਕਾਰਡ ਸੋਧੋ' : '<i class="fa-solid fa-plus-circle"></i> ਨਵੀਂ ਤਰੀਕ ਦਰਜ ਕਰੋ';
+}
+function resetForm() {
+    editingId = null;
+    document.getElementById('periodDate').value = '';
+    document.getElementById('painLevel').value = 0;
+    document.getElementById('painLabel').textContent = '0 / 10';
+    document.getElementById('periodNote').value = '';
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelectorAll('.flow-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelectorAll('.symptom-chip').forEach(b=>b.classList.remove('selected'));
+    selectedMood = ''; selectedFlow = ''; selectedSymptoms = [];
+    setFormMode(false);
+}
+function fillForm(entry) {
+    editingId = entry.id;
+    document.getElementById('periodDate').value = entry.date || '';
+    document.getElementById('painLevel').value = entry.pain ?? 0;
+    document.getElementById('painLabel').textContent = `${entry.pain ?? 0} / 10`;
+    document.getElementById('periodNote').value = entry.note || '';
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelectorAll('.flow-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelectorAll('.symptom-chip').forEach(b=>b.classList.remove('selected'));
+
+    selectedMood = entry.mood || ''; selectedFlow = entry.flow || '';
+    selectedSymptoms = Array.isArray(entry.symptoms) ? [...entry.symptoms] : [];
+
+    document.querySelectorAll('.mood-btn').forEach(b=>{ if (b.dataset.mood === selectedMood) b.classList.add('selected'); });
+    document.querySelectorAll('.flow-btn').forEach(b=>{ if (b.dataset.flow === selectedFlow) b.classList.add('selected'); });
+    document.querySelectorAll('.symptom-chip').forEach(chip=>{ if (selectedSymptoms.includes(chip.textContent.trim())) chip.classList.add('selected'); });
+
+    setFormMode(true);
+    showToast('✏️ ਰਿਕਾਰਡ ਸੋਧਣ ਲਈ ਤਿਆਰ ਹੈ');
+    switchTab('add');
+}
+function cancelEdit() { resetForm(); showToast('✅ ਸੋਧ ਰੱਦ ਹੋ ਗਈ'); }
+function avgCycleLength() {
+    const lens = cycles.filter(c=>c.cycleLength).map(c=>c.cycleLength);
+    return lens.length ? Math.round(lens.reduce((a,b)=>a+b,0)/lens.length) : 28;
+}
+
+function sortAndProcess() {
+    cycles.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    for(let i=0;i<cycles.length;i++){
+        if(i<cycles.length-1){
+            cycles[i].cycleLength = Math.abs(daysDiff(cycles[i+1].date, cycles[i].date));
+            if(cycles[i].cycleLength<25) cycles[i].status='early';
+            else if(cycles[i].cycleLength>31) cycles[i].status='late';
+            else cycles[i].status='normal';
+        } else { cycles[i].cycleLength=null; cycles[i].status='first'; }
+    }
+}
+function saveData() { sortAndProcess(); localStorage.setItem('periodTrackerData_v3', JSON.stringify(cycles)); }
+
+function switchTab(name) {
+    ['dashboard','add','history','stats'].forEach(t=>document.getElementById('tab-'+t).classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b=>{ b.classList.remove('active'); b.classList.add('text-gray-500'); });
+    document.getElementById('tab-'+name).classList.remove('hidden');
+    const idx = ['dashboard','add','history','stats'].indexOf(name);
+    const btns = document.querySelectorAll('.tab-btn');
+    btns[idx].classList.add('active'); btns[idx].classList.remove('text-gray-500');
+    if(name==='history'){ populateYearFilter(); renderHistory(); }
+    if(name==='stats') renderStats();
+    if(name==='dashboard') { renderDashboard(); }
+}
+
+function selectMood(btn) { document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedMood = btn.dataset.mood; }
+function selectFlow(btn) { document.querySelectorAll('.flow-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedFlow = btn.dataset.flow; }
+function toggleSymptom(chip) {
+    chip.classList.toggle('selected');
+    const t = chip.textContent.trim();
+    if(selectedSymptoms.includes(t)) selectedSymptoms = selectedSymptoms.filter(s=>s!==t); else selectedSymptoms.push(t);
+}
+
+function handleAddPeriod() {
+    const dateInput = document.getElementById('periodDate').value;
+    if(!dateInput){ showToast('⚠️ ਕਿਰਪਾ ਤਰੀਕ ਚੁਣੋ'); return; }
+
+    const duplicate = cycles.some(c => c.date === dateInput && c.id !== editingId);
+    if(duplicate){ showToast('⚠️ ਇਹ ਤਰੀਕ ਪਹਿਲਾਂ ਦਰਜ ਹੈ'); return; }
+
+    const newId = Date.now().toString(); 
+    const isEditingMode = !!editingId;
+
+    const entry = {
+        id: newId,
+        date: dateInput, mood: selectedMood, flow: selectedFlow,
+        pain: parseInt(document.getElementById('painLevel').value) || 0,
+        symptoms: [...selectedSymptoms], note: document.getElementById('periodNote').value.trim()
+    };
+
+    if (isEditingMode) {
+        const idx = cycles.findIndex(c => c.id === editingId);
+        if (idx !== -1) cycles[idx] = entry;
+        editingId = null;
+    } else {
+        cycles.push(entry);
+    }
+
+    saveData(); resetForm();
+    showToast(isEditingMode ? '✅ ਰਿਕਾਰਡ ਅਪਡੇਟ ਹੋ ਗਿਆ!' : '✅ ਡਾਟਾ ਸੇਵ ਹੋ ਗਿਆ!');
+    switchTab('history');
+}
+
+function renderDashboard() {
+    const dash = document.getElementById('statusDashboard');
+    if(cycles.length===0){
+        dash.innerHTML='<div class="text-center py-6 text-gray-500"><i class="fa-solid fa-plus-circle text-3xl mb-2 text-pink-300"></i><br>ਹਾਲੇ ਕੋਈ ਡਾਟਾ ਨਹੀਂ। <span class="text-pink-600 font-semibold cursor-pointer" onclick="switchTab(\'add\')">ਪਹਿਲਾ ਰਿਕਾਰਡ ਦਰਜ ਕਰੋ →</span></div>';
+        document.getElementById('healthTip').innerHTML='<p class="text-gray-400">ਡਾਟਾ ਦਰਜ ਕਰੋ।</p>';
+        return;
+    }
+    const last = cycles[0]; 
+    const today = getLocalDate();
+    const dayN = daysDiff(last.date, today)+1; const phase = getPhase(dayN);
+    const avg = avgCycleLength(); 
+
+    const pct = Math.min(dayN/avg, 1);
+    const r=42, circ=2*Math.PI*r; const offset = circ*(1-pct);
+
+    dash.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center gap-5 mb-4">
+            <div class="flex-shrink-0">
+                <svg width="110" height="110">
+                    <circle cx="55" cy="55" r="\${r}" fill="none" stroke="#fce7f3" stroke-width="10"/>
+                    <circle class="progress-circle" cx="55" cy="55" r="\${r}" fill="none" stroke="#ec4899" stroke-width="10" stroke-dasharray="\${circ}" stroke-dashoffset="\${offset}" stroke-linecap="round" style="transform-origin:55px 55px" class="progress-ring"/>
+                    <text x="55" y="50" text-anchor="middle" fill="#be185d" font-size="20" font-weight="bold">ਦਿਨ</text>
+                    <text x="55" y="72" text-anchor="middle" fill="#9d174d" font-size="26" font-weight="bold">\${dayN}</text>
+                </svg>
+            </div>
+            <div class="flex-1 w-full space-y-2">
+                <div class="flex justify-between items-center bg-pink-50 rounded-xl px-4 py-3 border border-pink-100"><span class="text-sm text-gray-600">ਪਿਛਲੀ ਮਾਹਵਾਰੀ</span><span class="font-bold text-pink-700 text-sm">\${fmtDate(last.date)}</span></div>
+                <div class="flex justify-between items-center bg-purple-50 rounded-xl px-4 py-3 border border-purple-100"><span class="text-sm text-gray-600">ਔਸਤ ਚੱਕਰ</span><span class="font-bold text-purple-700 text-sm">\${avg} ਦਿਨ</span></div>
+            </div>
+        </div>
+        <div class="\${phase.color} rounded-xl p-4 flex flex-col gap-2">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid \${phase.icon} text-2xl opacity-70 w-8 text-center"></i>
+                <div><p class="text-xs font-bold uppercase tracking-wide opacity-60">ਮੌਜੂਦਾ ਪੜਾਅ</p><p class="font-bold text-base">\${phase.name}</p></div>
+            </div>
+            <p class="text-sm opacity-80"><i class="fa-solid fa-heart mr-1"></i>ਉਤੇਜਨਾ: <strong>\${phase.arousal}</strong></p>
+        </div>
+    `;
+    document.getElementById('healthTip').innerHTML = `<div class="flex gap-3"><i class="fa-solid fa-leaf text-green-500 text-lg mt-0.5"></i><p>\${phase.tip}</p></div>`;
+}
+
+function populateYearFilter() {
+    const f = document.getElementById('yearFilter'); const prev = f.value;
+    const years = [...new Set(cycles.map(c=>new Date(c.date).getFullYear()))].sort((a,b)=>b-a);
+    f.innerHTML = '<option value="all">ਸਾਰੇ ਸਾਲ</option>';
+    years.forEach(y=>f.innerHTML+=`<option value="\${y}">\${y}</option>`);
+    if(years.includes(parseInt(prev))) f.value=prev;
+}
+
+function renderHistory() {
+    const cont = document.getElementById('historyContainer');
+    const fy = document.getElementById('yearFilter').value;
+    const fs = document.getElementById('statusFilter').value;
+    const ff = document.getElementById('flowFilter').value;
+    const fq = document.getElementById('searchFilter').value.toLowerCase();
+
+    let filtered = cycles.filter(c=>{
+        const d = new Date(c.date+'T00:00:00');
+        const ym = fy==='all'||d.getFullYear().toString()===fy;
+        const sm = fs==='all'||c.status===fs||(fs==='normal'&&c.status==='first');
+        const flm = ff==='all'||c.flow===ff;
+        const qm = !fq || (c.note&&c.note.toLowerCase().includes(fq))||(c.symptoms&&c.symptoms.join(' ').toLowerCase().includes(fq));
+        return ym&&sm&&flm&&qm;
+    });
+
+    if(filtered.length===0){
+        cont.innerHTML=''; document.getElementById('emptyState').classList.remove('hidden'); return;
+    }
+    document.getElementById('emptyState').classList.add('hidden');
+
+    let rows='';
+    filtered.forEach((c,i)=>{
+        const num = filtered.length-i; let badge='';
+        if(c.status==='early') badge='<span class="badge badge-early">ਜਲਦੀ</span>';
+        else if(c.status==='late') badge='<span class="badge badge-late">ਲੇਟ</span>';
+        else if(c.status==='normal') badge='<span class="badge badge-normal">ਨਾਰਮਲ</span>';
+        else badge='<span class="badge badge-first">ਪਹਿਲਾ</span>';
+        
+        const len = c.cycleLength ? `<span class="font-black text-gray-700">\${c.cycleLength}</span>` : '<span class="text-gray-300">-</span>';
+        
+        let moodBadge = c.mood ? `<span class="bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-indigo-200 shadow-sm">\${c.mood}</span>` : '<span class="text-gray-300">-</span>';
+        let flowBadge = c.flow ? `<span class="bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-teal-200 shadow-sm">\${c.flow}</span>` : '<span class="text-gray-300">-</span>';
+        let painDisplay = c.pain != null ? `<span class="text-red-700 font-bold bg-red-100 px-2.5 py-1 rounded-lg text-xs border border-red-200 shadow-sm">\${c.pain} <span class="text-red-400 opacity-80">/10</span></span>` : '<span class="text-gray-300">-</span>';
+
+        rows += `<tr class="border-b border-gray-200 transition duration-150">
+            <td class="px-3 py-4 font-bold text-gray-500 text-sm text-center bg-gray-50">\${num}</td>
+            <td class="px-3 py-4 text-sm font-bold text-gray-800 whitespace-nowrap bg-pink-50">\${fmtDate(c.date)}</td>
+            <td class="px-3 py-4 text-sm text-center bg-purple-50">\${len}</td>
+            <td class="px-3 py-4 whitespace-nowrap text-center bg-orange-50">\${badge}</td>
+            <td class="px-3 py-4 text-center bg-teal-50">\${flowBadge}</td>
+            <td class="px-3 py-4 text-center bg-red-50">\${painDisplay}</td>
+            <td class="px-3 py-4 text-center bg-indigo-50">\${moodBadge}</td>
+            <td class="px-3 py-4 text-right bg-white">
+                <div class="flex items-center justify-end gap-1.5">
+                    <button class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="editEntry('\${c.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="text-red-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="deleteEntry('\${c.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`;
+        
+        if(c.symptoms&&c.symptoms.length>0||c.note){
+            const info = [c.symptoms&&c.symptoms.length>0?c.symptoms.join(', '):'', c.note?`"\${c.note}"`:''].filter(Boolean).join(' | ');
+            rows+=`<tr class="bg-gray-50 border-b border-gray-300"><td colspan="8" class="px-4 py-2.5 text-xs text-gray-500 font-medium tracking-wide border-l-4 border-pink-400">📝 \${info}</td></tr>`;
+        }
+    });
+    
+    cont.innerHTML=`<div class="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+        <table class="w-full text-sm text-left text-gray-600 min-w-max border-collapse">
+            <thead class="text-xs text-gray-600 uppercase bg-gray-100 border-b border-gray-300">
+                <tr>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-gray-200">ਲੜੀ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider bg-pink-100">ਤਰੀਕ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-purple-100">ਚੱਕਰ (ਦਿਨ)</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-orange-100">ਸਥਿਤੀ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-teal-100">ਫਲੋਅ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-red-100">ਦਰਦ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-center bg-indigo-100">ਮੂਡ</th>
+                    <th class="px-3 py-4 font-extrabold tracking-wider text-right bg-white">ਐਕਸ਼ਨ</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                \${rows}
+            </tbody>
+        </table>
+    </div>`;
+}
+
+function editEntry(id) { const entry = cycles.find(c => c.id === id); if (entry) fillForm(entry); }
+function deleteEntry(id) {
+    if(!confirm('ਕੀ ਇਹ ਰਿਕਾਰਡ ਮਿਟਾਉਣਾ ਹੈ?')) return;
+    if (editingId === id) resetForm();
+    cycles = cycles.filter(c=>c.id!==id); saveData(); renderHistory(); showToast('🗑️ ਰਿਕਾਰਡ ਮਿਟਾਇਆ ਗਿਆ');
+}
+
+function renderStats() {
+    const cont = document.getElementById('statsContent');
+    if(cycles.length<2){
+        cont.innerHTML=`<div class="glass rounded-2xl p-6 text-center text-gray-400"><i class="fa-solid fa-chart-pie text-4xl mb-3 text-pink-200"></i><br>ਅੰਕੜਿਆਂ ਲਈ ਘੱਟੋ-ਘੱਟ 2 ਰਿਕਾਰਡ ਚਾਹੀਦੇ ਹਨ।</div>`; return;
+    }
+    const lens = cycles.filter(c=>c.cycleLength).map(c=>c.cycleLength);
+    const avg = lens.length ? (lens.reduce((a,b)=>a+b,0)/lens.length).toFixed(1) : '-';
+    const minL = lens.length ? Math.min(...lens) : '-'; const maxL = lens.length ? Math.max(...lens) : '-';
+    const early = cycles.filter(c=>c.status==='early').length; const late = cycles.filter(c=>c.status==='late').length; const normal = cycles.filter(c=>c.status==='normal').length;
+    const painVals = cycles.filter(c=>c.pain!=null).map(c=>c.pain);
+    const avgPain = painVals.length ? (painVals.reduce((a,b)=>a+b,0)/painVals.length).toFixed(1) : '-';
+    const symCount = {}; cycles.forEach(c=>{ if(c.symptoms) c.symptoms.forEach(s=>{ symCount[s]=(symCount[s]||0)+1; }); });
+    const topSym = Object.entries(symCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const moodCount = {}; cycles.forEach(c=>{ if(c.mood) moodCount[c.mood]=(moodCount[c.mood]||0)+1; });
+    const topMood = Object.entries(moodCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+    cont.innerHTML=`
+        <div class="glass rounded-2xl p-5 border-t-4 border-pink-400 mb-4"><h2 class="text-lg font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar"></i> ਚੱਕਰ ਦੇ ਅੰਕੜੇ</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3">\${[['ਕੁੱਲ ਚੱਕਰ',cycles.length,'fa-circle-dot','pink'],['ਔਸਤ ਦਿਨ',avg,'fa-ruler','purple'],['ਸਭ ਤੋਂ ਛo\u0a1fਾ',minL?minL+' ਦਿਨ':'-','fa-minimize','blue'],['ਸਭ ਤੋਂ ਲo\u0a70ਮਾ',maxL?maxL+' ਦਿਨ':'-','fa-maximize','green']].map(([l,v,ic,cl])=>\`<div class="stat-card text-center"><i class="fa-solid \${ic} text-\${cl}-400 text-xl mb-1"></i><p class="text-xs text-gray-400 mt-1">\${l}</p><p class="text-2xl font-black text-gray-800">\${v}</p></div>\`).join('')}</div></div>
+        <div class="glass rounded-2xl p-5 border-t-4 border-purple-400 mb-4"><h2 class="text-lg font-bold text-purple-700 mb-4"><i class="fa-solid fa-pie-chart mr-2"></i>ਸਥਿਤੀ ਵੰਡ</h2><div class="grid grid-cols-3 gap-3">\${[['ਨਾਰਮਲ',normal,'green','✅'],['ਜਲਦੀ',early,'yellow','⚡'],['ਲੇਟ',late,'orange','⏰']].map(([l,n,c,e])=>\`<div class="text-center bg-\${c}-50 rounded-xl p-3 border border-\${c}-100"><p class="text-2xl">\${e}</p><p class="text-xl font-black text-\${c}-700">\${n}</p><p class="text-xs text-gray-500">\${l}</p></div>\`).join('')}</div></div>
+        \${avgPain!=='-'?\`<div class="glass rounded-2xl p-5 border-t-4 border-red-300 mb-4"><h2 class="text-lg font-bold text-red-700 mb-3"><i class="fa-solid fa-gauge mr-2"></i>ਦਰਦ ਔਸਤ</h2><div class="flex items-center gap-4"><div class="text-4xl font-black text-red-600">\${avgPain}<span class="text-lg text-gray-400">/10</span></div><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="h-3 bg-gradient-to-r from-green-400 to-red-500 rounded-full" style="width:\${(avgPain/10*100).toFixed(0)}%"></div></div></div></div>\`:\`\`}
+        \${topSym.length>0?\`<div class="glass rounded-2xl p-5 border-t-4 border-blue-300 mb-4"><h2 class="text-lg font-bold text-blue-700 mb-3"><i class="fa-solid fa-stethoscope mr-2"></i>ਸਭ ਤੋਂ ਵੱਧ ਲੱਛਣ</h2><div class="space-y-2">\${topSym.map(([s,n])=>\`<div class="flex items-center gap-3"><span class="text-sm font-medium text-gray-700 w-36">\${s}</span><div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-2.5 bg-blue-400 rounded-full" style="width:\${(n/cycles.length*100).toFixed(0)}%"></div></div><span class="text-xs text-gray-500 w-8 text-right">\${n}x</span></div>\`).join('')}</div></div>\`:\`\`}
+        \${topMood.length>0?\`<div class="glass rounded-2xl p-5 border-t-4 border-yellow-300"><h2 class="text-lg font-bold text-yellow-700 mb-3"><i class="fa-solid fa-face-smile mr-2"></i>ਮੂਡ ਅੰਕੜੇ</h2><div class="flex flex-wrap gap-2">\${topMood.map(([m,n])=>\`<span class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold">\${m} <strong>\${n}</strong></span>\`).join('')}</div></div>\`:\`\`}
+    `;
+}
+
+function downloadPDF() {
+    if(cycles.length===0){ showToast('⚠️ ਕੋਈ ਡਾਟਾ ਨਹੀਂ'); return; }
+    showToast('⏳ PDF ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ...');
+
+    const fy = document.getElementById('yearFilter').value;
+    const fs = document.getElementById('statusFilter').value;
+    const ff = document.getElementById('flowFilter').value;
+    const fq = document.getElementById('searchFilter').value.toLowerCase();
+    
+    let filtered = cycles.filter(c=>{
+        const d = new Date(c.date+'T00:00:00');
+        const ym = fy==='all'||d.getFullYear().toString()===fy;
+        const sm = fs==='all'||c.status===fs||(fs==='normal'&&c.status==='first');
+        const flm = ff==='all'||c.flow===ff;
+        const qm = !fq || (c.note&&c.note.toLowerCase().includes(fq))||(c.symptoms&&c.symptoms.join(' ').toLowerCase().includes(fq));
+        return ym&&sm&&flm&&qm;
+    });
+
+    if(filtered.length === 0){
+        showToast('⚠️ ਫਿਲਟਰ ਕੀਤੇ ਡਾਟੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ'); 
+        return;
+    }
+
+    let htmlStr = `
+        <div style="padding: 20px; font-family: 'Noto Sans Gurmukhi', sans-serif; background-color: white;">
+            <h2 style="text-align:center; color:#be185d; font-size: 24px; margin-bottom: 5px;">Periods (ਸਿਹਤ ਟਰੈਕਰ)</h2>
+            <p style="text-align:center; color:#6b7280; font-size:14px; margin-bottom: 20px;">ਜਨਰੇਟ ਕੀਤਾ ਗਿਆ: \${getLocalDate().split('-').reverse().join('-')}</p>
+            <table style="width:100%; border-collapse: collapse; font-size:14px; text-align: left;">
+                <thead>
+                    <tr style="background-color:#be185d; color:white;">
+                        <th style="padding:10px; border:1px solid #ddd;">#</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਤਰੀਕ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਚੱਕਰ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਸਥਿਤੀ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਫਲੋਅ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਦਰਦ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਮੂਡ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਲੱਛਣ</th>
+                        <th style="padding:10px; border:1px solid #ddd;">ਨੋਟ</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    filtered.forEach((c, i) => {
+        const statusMap = { normal:'ਨਾਰਮਲ', early:'ਜਲਦੀ', late:'ਲੇਟ', first:'ਪਹਿਲਾ' };
+        const symptomText = c.symptoms && c.symptoms.length ? c.symptoms.join(', ') : '-';
+        htmlStr += `
+            <tr style="\${i % 2 === 0 ? 'background-color:#fdf2f8;' : 'background-color:#fff;'} page-break-inside: avoid;">
+                <td style="padding:10px; border:1px solid #ddd;">\${filtered.length - i}</td>
+                <td style="padding:10px; border:1px solid #ddd; white-space: nowrap;">\${fmtDate(c.date)}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${c.cycleLength ? c.cycleLength : '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${statusMap[c.status] || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${c.flow || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${c.pain != null ? c.pain + '/10' : '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${c.mood || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${symptomText}</td>
+                <td style="padding:10px; border:1px solid #ddd;">\${c.note || '-'}</td>
+            </tr>
+        `;
+    });
+    htmlStr += `</tbody></table></div>`;
+
+    const opt = {
+        margin:       10,
+        filename:     'Periods_Record.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak:    { mode: ['css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(htmlStr).save().then(() => {
+        showToast('✅ PDF ਡਾਊਨਲੋਡ ਹੋ ਗਿਆ!');
+    }).catch(err => {
+        console.error('PDF Error:', err);
+        showToast('❌ PDF ਬਣਾਉਣ ਵਿੱਚ ਗਲਤੀ ਆਈ');
+    });
+}
+
+function exportJSON() {
+    const blob = new Blob([JSON.stringify(cycles,null,2)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'periods_backup_'+getLocalDate()+'.json';
+    a.click();
+    showToast('✅ ਬੈਕਅੱਪ ਡਾਊਨਲੋਡ ਹੋਇਆ');
+}
+function importJSON(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if(!Array.isArray(data)) throw new Error();
+            if(confirm(\`\${data.length} ਰਿਕਾਰਡ ਮਿਲੇ। ਕੀ ਰਿਸਟੋਰ ਕਰਨਾ ਹੈ? (ਮੌਜੂਦਾ ਡਾਟਾ ਮਿਲਾਇਆ ਜਾਵੇਗਾ)\`)){
+                const existing = new Set(cycles.map(c=>c.date));
+                data.forEach(c=>{ if(!existing.has(c.date)) cycles.push(c); });
+                saveData(); switchTab('dashboard');
+                showToast(\`✅ \${data.length} ਰਿਕਾਰਡ ਰਿਸਟੋਰ ਹੋਏ\`);
+            }
+        } catch { showToast('⚠️ ਫਾਈਲ ਗਲਤ ਹੈ'); }
+    };
+    reader.readAsText(file);
+    e.target.value='';
+}
+
+window.onload = () => {
+    document.getElementById('periodDate').max = getLocalDate();
+    setFormMode(false);
+    sortAndProcess();
+    renderDashboard();
+};
+</script>
+</body>
+</html>

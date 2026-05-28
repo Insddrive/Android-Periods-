@@ -1,0 +1,22 @@
+{
+  "project_info": {
+    "project_number": "1037007369851",
+    "project_id": "periods-pwa",
+    "storage_bucket": "periods-pwa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037007369851:android:f109f4e0eb5def1830d4de",
+        "android_client_info": {
+          "package_name": "com.aistudio.periods.pwa"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZQSsBTBMR4dGBkyka5VhPGB0FZ3lVtjQ"
+        }
+      ]
+    }
+  ]
+}
