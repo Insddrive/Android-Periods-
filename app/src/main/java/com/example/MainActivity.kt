@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         webView = WebView(this)
+        webView.fitsSystemWindows = true
         setContentView(webView)
 
         val settings: WebSettings = webView.settings
