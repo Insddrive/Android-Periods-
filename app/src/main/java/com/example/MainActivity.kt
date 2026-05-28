@@ -49,13 +49,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Let the system draw system bars normally and handle system windows automatically
+        // Ensure edge-to-edge does not draw under status and navigation bars
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
         
-        webView = WebView(this)
-        webView.fitsSystemWindows = true
+        setContentView(R.layout.activity_main)
         
-        setContentView(webView)
+        webView = findViewById(R.id.webview)
 
         val settings: WebSettings = webView.settings
         settings.javaScriptEnabled = true
