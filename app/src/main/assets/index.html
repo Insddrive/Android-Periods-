@@ -585,8 +585,17 @@ function downloadPDF() {
         pagebreak:    { mode: ['css', 'legacy'] }
     };
 
-    html2pdf().set(opt).from(htmlStr).save().then(() => {
-        showToast('✅ PDF ਡਾਊਨਲੋਡ ਹੋ ਗਿਆ!');
+    html2pdf().set(opt).from(htmlStr).outputPdf('datauristring').then(function(pdfBase64) {
+        if (window.AndroidInterface) {
+            window.AndroidInterface.saveBase64File(pdfBase64, 'Periods_Record.pdf', 'application/pdf');
+            showToast('✅ PDF ਡਾਊਨਲੋਡ ਹੋ ਗਿਆ!');
+        } else {
+            const a = document.createElement('a');
+            a.href = pdfBase64;
+            a.download = 'Periods_Record.pdf';
+            a.click();
+            showToast('✅ PDF ਡਾਊਨਲੋਡ ਹੋ ਗਿਆ!');
+        }
     }).catch(err => {
         console.error('PDF Error:', err);
         showToast('❌ PDF ਬਣਾਉਣ ਵਿੱਚ ਗਲਤੀ ਆਈ');
@@ -594,12 +603,19 @@ function downloadPDF() {
 }
 
 function exportJSON() {
-    const blob = new Blob([JSON.stringify(cycles,null,2)],{type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'periods_backup_'+getLocalDate()+'.json';
-    a.click();
-    showToast('✅ ਬੈਕਅੱਪ ਡਾਊਨਲੋਡ ਹੋਇਆ');
+    const jsonStr = JSON.stringify(cycles,null,2);
+    const filename = 'periods_backup_'+getLocalDate()+'.json';
+    if (window.AndroidInterface) {
+        window.AndroidInterface.saveFile(jsonStr, filename, "application/json");
+        showToast('✅ ਬੈਕਅੱਪ ਡਾਊਨਲੋਡ ਹੋਇਆ');
+    } else {
+        const blob = new Blob([jsonStr],{type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        showToast('✅ ਬੈਕਅੱਪ ਡਾਊਨਲੋਡ ਹੋਇਆ');
+    }
 }
 function importJSON(e) {
     const file = e.target.files[0];
