@@ -49,17 +49,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Let the system draw system bars normally, but we will handle the insets manually
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        // Let the system draw system bars normally and handle system windows automatically
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
         
         webView = WebView(this)
-        
-        // Apply system window insets to avoid overlapping top and bottom bars
-        ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        webView.fitsSystemWindows = true
         
         setContentView(webView)
 
