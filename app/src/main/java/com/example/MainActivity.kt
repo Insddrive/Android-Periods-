@@ -26,7 +26,13 @@ class MainActivity : ComponentActivity() {
         val settings: WebSettings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
+        settings.allowFileAccess = true
+        settings.allowContentAccess = true
+        settings.allowFileAccessFromFileURLs = true
+        settings.allowUniversalAccessFromFileURLs = true
+        settings.databaseEnabled = true
         
+        webView.webChromeClient = android.webkit.WebChromeClient()
         webView.webViewClient = WebViewClient()
         webView.loadUrl("file:///android_asset/index.html")
 

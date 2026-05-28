@@ -195,17 +195,12 @@
 <div id="toast"></div>
 
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(registration => console.log('SW Registered'))
-        .catch(err => console.log('SW Registration failed: ', err));
-    });
-  }
-</script>
-
-<script>
-let cycles = JSON.parse(localStorage.getItem('periodTrackerData_v3')) || [];
+let cycles = [];
+try {
+    cycles = JSON.parse(localStorage.getItem('periodTrackerData_v3')) || [];
+} catch (e) {
+    console.error("localStorage not accessible", e);
+}
 let selectedMood = '';
 let selectedFlow = '';
 let selectedSymptoms = [];
@@ -300,7 +295,14 @@ function sortAndProcess() {
         } else { cycles[i].cycleLength=null; cycles[i].status='first'; }
     }
 }
-function saveData() { sortAndProcess(); localStorage.setItem('periodTrackerData_v3', JSON.stringify(cycles)); }
+function saveData() { 
+    sortAndProcess(); 
+    try {
+        localStorage.setItem('periodTrackerData_v3', JSON.stringify(cycles)); 
+    } catch(e) {
+        console.error("Failed to save data: ", e);
+    }
+}
 
 function switchTab(name) {
     ['dashboard','add','history','stats'].forEach(t=>document.getElementById('tab-'+t).classList.add('hidden'));
