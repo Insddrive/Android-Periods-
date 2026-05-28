@@ -37,7 +37,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
         )
 
-        val channelId = "periods_default_channel"
+        val channelId = "periods_vibration_channel"
         val pattern = longArrayOf(300, 100, 300, 100, 300) // Delay before start, vibrate, sleep...
         
         val notificationBuilder = NotificationCompat.Builder(this, channelId)

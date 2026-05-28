@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Health Care",
+  "description": "Health tracker app",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
