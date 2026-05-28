@@ -41,7 +41,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val pattern = longArrayOf(300, 100, 300, 100, 300) // Delay before start, vibrate, sleep...
         
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // Use generic silhouette icon
+            .setSmallIcon(R.drawable.ic_stat_notification) // Use simple transparent bell
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)

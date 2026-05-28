@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -22,6 +23,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
@@ -46,11 +49,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Ensure the app does not draw under the status bar and navigation bar
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+        // Let the system draw system bars normally, but we will handle the insets manually
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         
         webView = WebView(this)
-        webView.fitsSystemWindows = true
+        
+        // Apply system window insets to avoid overlapping top and bottom bars
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        
         setContentView(webView)
 
         val settings: WebSettings = webView.settings
