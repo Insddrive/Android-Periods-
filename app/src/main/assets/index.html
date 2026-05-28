@@ -357,8 +357,8 @@ function handleAddPeriod() {
 function renderDashboard() {
     const dash = document.getElementById('statusDashboard');
     if(cycles.length===0){
-        dash.innerHTML='<div class="text-center py-6 text-gray-500"><i class="fa-solid fa-plus-circle text-3xl mb-2 text-pink-300"></i><br>ਹਾਲੇ ਕੋਈ ਡਾਟਾ ਨਹੀਂ। <span class="text-pink-600 font-semibold cursor-pointer" onclick="switchTab(\'add\')">ਪਹਿਲਾ ਰਿਕਾਰਡ ਦਰਜ ਕਰੋ →</span></div>';
-        document.getElementById('healthTip').innerHTML='<p class="text-gray-400">ਡਾਟਾ ਦਰਜ ਕਰੋ।</p>';
+        dash.innerHTML=`<div class="text-center py-6 text-gray-500"><i class="fa-solid fa-plus-circle text-3xl mb-2 text-pink-300"></i><br>ਹਾਲੇ ਕੋਈ ਡਾਟਾ ਨਹੀਂ। <span class="text-pink-600 font-semibold cursor-pointer" onclick="switchTab('add')">ਪਹਿਲਾ ਰਿਕਾਰਡ ਦਰਜ ਕਰੋ →</span></div>`;
+        document.getElementById('healthTip').innerHTML='<p class="text-gray-400">ਡਾਟਾ ਦਰਜ ਕਰੋ。</p>';
         return;
     }
     const last = cycles[0]; 
@@ -373,33 +373,33 @@ function renderDashboard() {
         <div class="flex flex-col sm:flex-row items-center gap-5 mb-4">
             <div class="flex-shrink-0">
                 <svg width="110" height="110">
-                    <circle cx="55" cy="55" r="\${r}" fill="none" stroke="#fce7f3" stroke-width="10"/>
-                    <circle class="progress-circle" cx="55" cy="55" r="\${r}" fill="none" stroke="#ec4899" stroke-width="10" stroke-dasharray="\${circ}" stroke-dashoffset="\${offset}" stroke-linecap="round" style="transform-origin:55px 55px" class="progress-ring"/>
+                    <circle cx="55" cy="55" r="${r}" fill="none" stroke="#fce7f3" stroke-width="10"/>
+                    <circle class="progress-circle" cx="55" cy="55" r="${r}" fill="none" stroke="#ec4899" stroke-width="10" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round" style="transform-origin:55px 55px" class="progress-ring"/>
                     <text x="55" y="50" text-anchor="middle" fill="#be185d" font-size="20" font-weight="bold">ਦਿਨ</text>
-                    <text x="55" y="72" text-anchor="middle" fill="#9d174d" font-size="26" font-weight="bold">\${dayN}</text>
+                    <text x="55" y="72" text-anchor="middle" fill="#9d174d" font-size="26" font-weight="bold">${dayN}</text>
                 </svg>
             </div>
             <div class="flex-1 w-full space-y-2">
-                <div class="flex justify-between items-center bg-pink-50 rounded-xl px-4 py-3 border border-pink-100"><span class="text-sm text-gray-600">ਪਿਛਲੀ ਮਾਹਵਾਰੀ</span><span class="font-bold text-pink-700 text-sm">\${fmtDate(last.date)}</span></div>
-                <div class="flex justify-between items-center bg-purple-50 rounded-xl px-4 py-3 border border-purple-100"><span class="text-sm text-gray-600">ਔਸਤ ਚੱਕਰ</span><span class="font-bold text-purple-700 text-sm">\${avg} ਦਿਨ</span></div>
+                <div class="flex justify-between items-center bg-pink-50 rounded-xl px-4 py-3 border border-pink-100"><span class="text-sm text-gray-600">ਪਿਛਲੀ ਮਾਹਵਾਰੀ</span><span class="font-bold text-pink-700 text-sm">${fmtDate(last.date)}</span></div>
+                <div class="flex justify-between items-center bg-purple-50 rounded-xl px-4 py-3 border border-purple-100"><span class="text-sm text-gray-600">ਔਸਤ ਚੱਕਰ</span><span class="font-bold text-purple-700 text-sm">${avg} ਦਿਨ</span></div>
             </div>
         </div>
-        <div class="\${phase.color} rounded-xl p-4 flex flex-col gap-2">
+        <div class="${phase.color} rounded-xl p-4 flex flex-col gap-2">
             <div class="flex items-center gap-3">
-                <i class="fa-solid \${phase.icon} text-2xl opacity-70 w-8 text-center"></i>
-                <div><p class="text-xs font-bold uppercase tracking-wide opacity-60">ਮੌਜੂਦਾ ਪੜਾਅ</p><p class="font-bold text-base">\${phase.name}</p></div>
+                <i class="fa-solid ${phase.icon} text-2xl opacity-70 w-8 text-center"></i>
+                <div><p class="text-xs font-bold uppercase tracking-wide opacity-60">ਮੌਜੂਦਾ ਪੜਾਅ</p><p class="font-bold text-base">${phase.name}</p></div>
             </div>
-            <p class="text-sm opacity-80"><i class="fa-solid fa-heart mr-1"></i>ਉਤੇਜਨਾ: <strong>\${phase.arousal}</strong></p>
+            <p class="text-sm opacity-80"><i class="fa-solid fa-heart mr-1"></i>ਉਤੇਜਨਾ: <strong>${phase.arousal}</strong></p>
         </div>
     `;
-    document.getElementById('healthTip').innerHTML = `<div class="flex gap-3"><i class="fa-solid fa-leaf text-green-500 text-lg mt-0.5"></i><p>\${phase.tip}</p></div>`;
+    document.getElementById('healthTip').innerHTML = `<div class="flex gap-3"><i class="fa-solid fa-leaf text-green-500 text-lg mt-0.5"></i><p>${phase.tip}</p></div>`;
 }
 
 function populateYearFilter() {
     const f = document.getElementById('yearFilter'); const prev = f.value;
     const years = [...new Set(cycles.map(c=>new Date(c.date).getFullYear()))].sort((a,b)=>b-a);
     f.innerHTML = '<option value="all">ਸਾਰੇ ਸਾਲ</option>';
-    years.forEach(y=>f.innerHTML+=`<option value="\${y}">\${y}</option>`);
+    years.forEach(y=>f.innerHTML+=`<option value="${y}">${y}</option>`);
     if(years.includes(parseInt(prev))) f.value=prev;
 }
 
@@ -432,31 +432,31 @@ function renderHistory() {
         else if(c.status==='normal') badge='<span class="badge badge-normal">ਨਾਰਮਲ</span>';
         else badge='<span class="badge badge-first">ਪਹਿਲਾ</span>';
         
-        const len = c.cycleLength ? `<span class="font-black text-gray-700">\${c.cycleLength}</span>` : '<span class="text-gray-300">-</span>';
+        const len = c.cycleLength ? `<span class="font-black text-gray-700">${c.cycleLength}</span>` : '<span class="text-gray-300">-</span>';
         
-        let moodBadge = c.mood ? `<span class="bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-indigo-200 shadow-sm">\${c.mood}</span>` : '<span class="text-gray-300">-</span>';
-        let flowBadge = c.flow ? `<span class="bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-teal-200 shadow-sm">\${c.flow}</span>` : '<span class="text-gray-300">-</span>';
-        let painDisplay = c.pain != null ? `<span class="text-red-700 font-bold bg-red-100 px-2.5 py-1 rounded-lg text-xs border border-red-200 shadow-sm">\${c.pain} <span class="text-red-400 opacity-80">/10</span></span>` : '<span class="text-gray-300">-</span>';
+        let moodBadge = c.mood ? `<span class="bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-indigo-200 shadow-sm">${c.mood}</span>` : '<span class="text-gray-300">-</span>';
+        let flowBadge = c.flow ? `<span class="bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-teal-200 shadow-sm">${c.flow}</span>` : '<span class="text-gray-300">-</span>';
+        let painDisplay = c.pain != null ? `<span class="text-red-700 font-bold bg-red-100 px-2.5 py-1 rounded-lg text-xs border border-red-200 shadow-sm">${c.pain} <span class="text-red-400 opacity-80">/10</span></span>` : '<span class="text-gray-300">-</span>';
 
         rows += `<tr class="border-b border-gray-200 transition duration-150">
-            <td class="px-3 py-4 font-bold text-gray-500 text-sm text-center bg-gray-50">\${num}</td>
-            <td class="px-3 py-4 text-sm font-bold text-gray-800 whitespace-nowrap bg-pink-50">\${fmtDate(c.date)}</td>
-            <td class="px-3 py-4 text-sm text-center bg-purple-50">\${len}</td>
-            <td class="px-3 py-4 whitespace-nowrap text-center bg-orange-50">\${badge}</td>
-            <td class="px-3 py-4 text-center bg-teal-50">\${flowBadge}</td>
-            <td class="px-3 py-4 text-center bg-red-50">\${painDisplay}</td>
-            <td class="px-3 py-4 text-center bg-indigo-50">\${moodBadge}</td>
+            <td class="px-3 py-4 font-bold text-gray-500 text-sm text-center bg-gray-50">${num}</td>
+            <td class="px-3 py-4 text-sm font-bold text-gray-800 whitespace-nowrap bg-pink-50">${fmtDate(c.date)}</td>
+            <td class="px-3 py-4 text-sm text-center bg-purple-50">${len}</td>
+            <td class="px-3 py-4 whitespace-nowrap text-center bg-orange-50">${badge}</td>
+            <td class="px-3 py-4 text-center bg-teal-50">${flowBadge}</td>
+            <td class="px-3 py-4 text-center bg-red-50">${painDisplay}</td>
+            <td class="px-3 py-4 text-center bg-indigo-50">${moodBadge}</td>
             <td class="px-3 py-4 text-right bg-white">
                 <div class="flex items-center justify-end gap-1.5">
-                    <button class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="editEntry('\${c.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button class="text-red-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="deleteEntry('\${c.id}')"><i class="fa-solid fa-trash"></i></button>
+                    <button class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="editEntry('${c.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="text-red-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg flex items-center justify-center transition" onclick="deleteEntry('${c.id}')"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </td>
         </tr>`;
         
         if(c.symptoms&&c.symptoms.length>0||c.note){
-            const info = [c.symptoms&&c.symptoms.length>0?c.symptoms.join(', '):'', c.note?`"\${c.note}"`:''].filter(Boolean).join(' | ');
-            rows+=`<tr class="bg-gray-50 border-b border-gray-300"><td colspan="8" class="px-4 py-2.5 text-xs text-gray-500 font-medium tracking-wide border-l-4 border-pink-400">📝 \${info}</td></tr>`;
+            const info = [c.symptoms&&c.symptoms.length>0?c.symptoms.join(', '):'', c.note?`"${c.note}"`:''].filter(Boolean).join(' | ');
+            rows+=`<tr class="bg-gray-50 border-b border-gray-300"><td colspan="8" class="px-4 py-2.5 text-xs text-gray-500 font-medium tracking-wide border-l-4 border-pink-400">📝 ${info}</td></tr>`;
         }
     });
     
@@ -475,7 +475,7 @@ function renderHistory() {
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                \${rows}
+                ${rows}
             </tbody>
         </table>
     </div>`;
@@ -505,11 +505,11 @@ function renderStats() {
     const topMood = Object.entries(moodCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
 
     cont.innerHTML=`
-        <div class="glass rounded-2xl p-5 border-t-4 border-pink-400 mb-4"><h2 class="text-lg font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar"></i> ਚੱਕਰ ਦੇ ਅੰਕੜੇ</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3">\${[['ਕੁੱਲ ਚੱਕਰ',cycles.length,'fa-circle-dot','pink'],['ਔਸਤ ਦਿਨ',avg,'fa-ruler','purple'],['ਸਭ ਤੋਂ ਛo\u0a1fਾ',minL?minL+' ਦਿਨ':'-','fa-minimize','blue'],['ਸਭ ਤੋਂ ਲo\u0a70ਮਾ',maxL?maxL+' ਦਿਨ':'-','fa-maximize','green']].map(([l,v,ic,cl])=>\`<div class="stat-card text-center"><i class="fa-solid \${ic} text-\${cl}-400 text-xl mb-1"></i><p class="text-xs text-gray-400 mt-1">\${l}</p><p class="text-2xl font-black text-gray-800">\${v}</p></div>\`).join('')}</div></div>
-        <div class="glass rounded-2xl p-5 border-t-4 border-purple-400 mb-4"><h2 class="text-lg font-bold text-purple-700 mb-4"><i class="fa-solid fa-pie-chart mr-2"></i>ਸਥਿਤੀ ਵੰਡ</h2><div class="grid grid-cols-3 gap-3">\${[['ਨਾਰਮਲ',normal,'green','✅'],['ਜਲਦੀ',early,'yellow','⚡'],['ਲੇਟ',late,'orange','⏰']].map(([l,n,c,e])=>\`<div class="text-center bg-\${c}-50 rounded-xl p-3 border border-\${c}-100"><p class="text-2xl">\${e}</p><p class="text-xl font-black text-\${c}-700">\${n}</p><p class="text-xs text-gray-500">\${l}</p></div>\`).join('')}</div></div>
-        \${avgPain!=='-'?\`<div class="glass rounded-2xl p-5 border-t-4 border-red-300 mb-4"><h2 class="text-lg font-bold text-red-700 mb-3"><i class="fa-solid fa-gauge mr-2"></i>ਦਰਦ ਔਸਤ</h2><div class="flex items-center gap-4"><div class="text-4xl font-black text-red-600">\${avgPain}<span class="text-lg text-gray-400">/10</span></div><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="h-3 bg-gradient-to-r from-green-400 to-red-500 rounded-full" style="width:\${(avgPain/10*100).toFixed(0)}%"></div></div></div></div>\`:\`\`}
-        \${topSym.length>0?\`<div class="glass rounded-2xl p-5 border-t-4 border-blue-300 mb-4"><h2 class="text-lg font-bold text-blue-700 mb-3"><i class="fa-solid fa-stethoscope mr-2"></i>ਸਭ ਤੋਂ ਵੱਧ ਲੱਛਣ</h2><div class="space-y-2">\${topSym.map(([s,n])=>\`<div class="flex items-center gap-3"><span class="text-sm font-medium text-gray-700 w-36">\${s}</span><div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-2.5 bg-blue-400 rounded-full" style="width:\${(n/cycles.length*100).toFixed(0)}%"></div></div><span class="text-xs text-gray-500 w-8 text-right">\${n}x</span></div>\`).join('')}</div></div>\`:\`\`}
-        \${topMood.length>0?\`<div class="glass rounded-2xl p-5 border-t-4 border-yellow-300"><h2 class="text-lg font-bold text-yellow-700 mb-3"><i class="fa-solid fa-face-smile mr-2"></i>ਮੂਡ ਅੰਕੜੇ</h2><div class="flex flex-wrap gap-2">\${topMood.map(([m,n])=>\`<span class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold">\${m} <strong>\${n}</strong></span>\`).join('')}</div></div>\`:\`\`}
+        <div class="glass rounded-2xl p-5 border-t-4 border-pink-400 mb-4"><h2 class="text-lg font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar"></i> ਚੱਕਰ ਦੇ ਅੰਕੜੇ</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${[['ਕੁੱਲ ਚੱਕਰ',cycles.length,'fa-circle-dot','pink'],['ਔਸਤ ਦਿਨ',avg,'fa-ruler','purple'],['ਸਭ ਤੋਂ ਛੋਟਾ',minL?minL+' ਦਿਨ':'-','fa-minimize','blue'],['ਸਭ ਤੋਂ ਲੰਮਾ',maxL?maxL+' ਦਿਨ':'-','fa-maximize','green']].map(([l,v,ic,cl])=>`<div class="stat-card text-center"><i class="fa-solid ${ic} text-${cl}-400 text-xl mb-1"></i><p class="text-xs text-gray-400 mt-1">${l}</p><p class="text-2xl font-black text-gray-800">${v}</p></div>`).join('')}</div></div>
+        <div class="glass rounded-2xl p-5 border-t-4 border-purple-400 mb-4"><h2 class="text-lg font-bold text-purple-700 mb-4"><i class="fa-solid fa-pie-chart mr-2"></i>ਸਥਿਤੀ ਵੰਡ</h2><div class="grid grid-cols-3 gap-3">${[['ਨਾਰਮਲ',normal,'green','✅'],['ਜਲਦੀ',early,'yellow','⚡'],['ਲੇਟ',late,'orange','⏰']].map(([l,n,c,e])=>`<div class="text-center bg-${c}-50 rounded-xl p-3 border border-${c}-100"><p class="text-2xl">${e}</p><p class="text-xl font-black text-${c}-700">${n}</p><p class="text-xs text-gray-500">${l}</p></div>`).join('')}</div></div>
+        ${avgPain!=='-'?`<div class="glass rounded-2xl p-5 border-t-4 border-red-300 mb-4"><h2 class="text-lg font-bold text-red-700 mb-3"><i class="fa-solid fa-gauge mr-2"></i>ਦਰਦ ਔਸਤ</h2><div class="flex items-center gap-4"><div class="text-4xl font-black text-red-600">${avgPain}<span class="text-lg text-gray-400">/10</span></div><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="h-3 bg-gradient-to-r from-green-400 to-red-500 rounded-full" style="width:${(avgPain/10*100).toFixed(0)}%"></div></div></div></div>`:''}
+        ${topSym.length>0?`<div class="glass rounded-2xl p-5 border-t-4 border-blue-300 mb-4"><h2 class="text-lg font-bold text-blue-700 mb-3"><i class="fa-solid fa-stethoscope mr-2"></i>ਸਭ ਤੋਂ ਵੱਧ ਲੱਛਣ</h2><div class="space-y-2">${topSym.map(([s,n])=>`<div class="flex items-center gap-3"><span class="text-sm font-medium text-gray-700 w-36">${s}</span><div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-2.5 bg-blue-400 rounded-full" style="width:${(n/cycles.length*100).toFixed(0)}%"></div></div><span class="text-xs text-gray-500 w-8 text-right">${n}x</span></div>`).join('')}</div></div>`:''}
+        ${topMood.length>0?`<div class="glass rounded-2xl p-5 border-t-4 border-yellow-300"><h2 class="text-lg font-bold text-yellow-700 mb-3"><i class="fa-solid fa-face-smile mr-2"></i>ਮੂਡ ਅੰਕੜੇ</h2><div class="flex flex-wrap gap-2">${topMood.map(([m,n])=>`<span class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold">${m} <strong>${n}</strong></span>`).join('')}</div></div>`:''}
     `;
 }
 
@@ -539,7 +539,7 @@ function downloadPDF() {
     let htmlStr = `
         <div style="padding: 20px; font-family: 'Noto Sans Gurmukhi', sans-serif; background-color: white;">
             <h2 style="text-align:center; color:#be185d; font-size: 24px; margin-bottom: 5px;">Periods (ਸਿਹਤ ਟਰੈਕਰ)</h2>
-            <p style="text-align:center; color:#6b7280; font-size:14px; margin-bottom: 20px;">ਜਨਰੇਟ ਕੀਤਾ ਗਿਆ: \${getLocalDate().split('-').reverse().join('-')}</p>
+            <p style="text-align:center; color:#6b7280; font-size:14px; margin-bottom: 20px;">ਜਨਰੇਟ ਕੀਤਾ ਗਿਆ: ${getLocalDate().split('-').reverse().join('-')}</p>
             <table style="width:100%; border-collapse: collapse; font-size:14px; text-align: left;">
                 <thead>
                     <tr style="background-color:#be185d; color:white;">
@@ -561,16 +561,16 @@ function downloadPDF() {
         const statusMap = { normal:'ਨਾਰਮਲ', early:'ਜਲਦੀ', late:'ਲੇਟ', first:'ਪਹਿਲਾ' };
         const symptomText = c.symptoms && c.symptoms.length ? c.symptoms.join(', ') : '-';
         htmlStr += `
-            <tr style="\${i % 2 === 0 ? 'background-color:#fdf2f8;' : 'background-color:#fff;'} page-break-inside: avoid;">
-                <td style="padding:10px; border:1px solid #ddd;">\${filtered.length - i}</td>
-                <td style="padding:10px; border:1px solid #ddd; white-space: nowrap;">\${fmtDate(c.date)}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${c.cycleLength ? c.cycleLength : '-'}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${statusMap[c.status] || '-'}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${c.flow || '-'}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${c.pain != null ? c.pain + '/10' : '-'}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${c.mood || '-'}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${symptomText}</td>
-                <td style="padding:10px; border:1px solid #ddd;">\${c.note || '-'}</td>
+            <tr style="${i % 2 === 0 ? 'background-color:#fdf2f8;' : 'background-color:#fff;'} page-break-inside: avoid;">
+                <td style="padding:10px; border:1px solid #ddd;">${filtered.length - i}</td>
+                <td style="padding:10px; border:1px solid #ddd; white-space: nowrap;">${fmtDate(c.date)}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${c.cycleLength ? c.cycleLength : '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${statusMap[c.status] || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${c.flow || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${c.pain != null ? c.pain + '/10' : '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${c.mood || '-'}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${symptomText}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${c.note || '-'}</td>
             </tr>
         `;
     });
@@ -609,11 +609,11 @@ function importJSON(e) {
         try {
             const data = JSON.parse(ev.target.result);
             if(!Array.isArray(data)) throw new Error();
-            if(confirm(\`\${data.length} ਰਿਕਾਰਡ ਮਿਲੇ। ਕੀ ਰਿਸਟੋਰ ਕਰਨਾ ਹੈ? (ਮੌਜੂਦਾ ਡਾਟਾ ਮਿਲਾਇਆ ਜਾਵੇਗਾ)\`)){
+            if(confirm(`${data.length} ਰਿਕਾਰਡ ਮਿਲੇ। ਕੀ ਰਿਸਟੋਰ ਕਰਨਾ ਹੈ? (ਮੌਜੂਦਾ ਡਾਟਾ ਮਿਲਾਇਆ ਜਾਵੇਗਾ)`)){
                 const existing = new Set(cycles.map(c=>c.date));
                 data.forEach(c=>{ if(!existing.has(c.date)) cycles.push(c); });
                 saveData(); switchTab('dashboard');
-                showToast(\`✅ \${data.length} ਰਿਕਾਰਡ ਰਿਸਟੋਰ ਹੋਏ\`);
+                showToast(`✅ ${data.length} ਰਿਕਾਰਡ ਰਿਸਟੋਰ ਹੋਏ`);
             }
         } catch { showToast('⚠️ ਫਾਈਲ ਗਲਤ ਹੈ'); }
     };
