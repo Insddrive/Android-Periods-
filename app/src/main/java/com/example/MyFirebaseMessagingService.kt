@@ -21,6 +21,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Periods Alert"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
 
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            vibrator.vibrate(android.os.VibrationEffect.createOneShot(500, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(500)
+        }
+
         sendNotificationAndVibrate(title, body)
     }
 
@@ -38,7 +46,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         )
 
         val channelId = "periods_vibration_channel_v3"
-        val pattern = longArrayOf(300, 100, 300, 100, 300) // Delay before start, vibrate, sleep...
+        val pattern = longArrayOf(0, 500, 200, 500)
         
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_stat_notification) // Use simple transparent bell
@@ -65,23 +73,5 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val notification = notificationBuilder.build()
         notificationManager.notify(0, notification)
-
-        // Manual vibration for Android < O or in case channel doesn't trigger it nicely
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-        
-        if (vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(pattern, -1)
-            }
-        }
     }
 }
