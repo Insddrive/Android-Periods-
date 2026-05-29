@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -91,7 +93,24 @@ class MainActivity : ComponentActivity() {
         webView.loadUrl("file:///android_asset/index.html")
 
         askNotificationPermission()
+        createNotificationChannel()
         subscribeToTopic()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "periods_vibration_channel_v3"
+            val channel = NotificationChannel(
+                channelId,
+                "Periods Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channel.enableVibration(true)
+            channel.vibrationPattern = longArrayOf(0, 500, 200, 500)
+            
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
